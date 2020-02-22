@@ -188,4 +188,29 @@ public class ItemServiceImpl implements ItemService {
             return "";
         }
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void decreaseItemSpecStock(String specId, int buyCounts) {
+
+
+        // 注意点：synchronized关键字不推荐使用，集群下无用，性能低下
+        //        锁数据库不推荐，导致数据库性能低下
+        //        推荐使用分布式锁 zookeeper he redis
+
+        // 伪代码
+        // lockUtil.getLock(); 加锁
+
+        // 1. 查询库存
+
+
+        // 2. 判断是否够扣除库存，如果不够提示用户扣减库存不足，这个是公共资源，可能存在超卖的情况，这里需要加锁，非分布式下采用乐观锁
+        Integer result = itemsMapperCustom.decreaseItemSpecStock(specId, buyCounts);
+        if (result != 1) {
+            throw new RuntimeException("创建订单失败，扣减库存失败");
+        }
+
+        // lockUtil.unLock(); 解锁
+
+    }
 }

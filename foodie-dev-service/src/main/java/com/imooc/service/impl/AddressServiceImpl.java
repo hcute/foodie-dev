@@ -104,7 +104,7 @@ public class AddressServiceImpl implements AddressService {
         UserAddress userAddress = new UserAddress();
         userAddress.setUserId(userId);
         userAddress.setId(addressId);
-        UserAddress userAddress1 = userAddressMapper.selectOne(userAddress);
-        return userAddress;
+        UserAddress dependingUserAddress = userAddressMapper.selectOne(userAddress);
+        return dependingUserAddress;
     }
 }

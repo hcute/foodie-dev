@@ -98,4 +98,11 @@ public interface ItemService {
      */
     String queryItemMainImgById(String itemId);
 
+    /**
+     * 扣减规格中的库存
+     * @param specId
+     * @param buyCounts
+     */
+    void decreaseItemSpecStock(String specId,int buyCounts);
+
 }

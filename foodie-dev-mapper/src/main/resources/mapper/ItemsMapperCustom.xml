@@ -140,4 +140,21 @@
                 #{specId}
             </foreach>
     </select>
+
+    <update id="decreaseItemSpecStock" >
+        update
+            items_spec
+        set
+            stock = stock - #{pendingCounts}
+        where
+            id = #{specId}
+        and
+            stock >= #{pendingCounts}
+
+    </update>
+
+    <!--and
+            stock >= #{pendingCounts}
+     是一种乐观锁的机制
+    -->
 </mapper>
