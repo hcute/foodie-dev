@@ -7,6 +7,8 @@ public class Users {
     /**
      * 主键id 用户id
      */
+    // mysql 8 不加注解会存在问题 会把所有的字段当作主键
+    @Id
     private String id;
 
     /**
