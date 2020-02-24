@@ -1,8 +1,16 @@
 package com.imooc.controller;
 
+import com.imooc.pojo.Orders;
+import com.imooc.service.center.MyOrdersService;
+import com.imooc.utils.IMOOCJSONResult;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.File;
 
 public class BasicController {
+
+    @Autowired
+    public MyOrdersService myOrdersService;
 
     public static final String FOODIE_SHOPCAT = "shopcat";
 
@@ -32,5 +40,21 @@ public class BasicController {
                     File.separator+"foodie" +
                     File.separator+"faces";
 
+
+
+    /**
+     *
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    public IMOOCJSONResult checkUserOrder(String userId, String orderId){
+        Orders orders = myOrdersService.queryMyOrder(userId, orderId);
+        if (orders == null){
+            return IMOOCJSONResult.errorMsg("用户订单不存在");
+        }
+        return IMOOCJSONResult.ok(orders);
+
+    }
 
 }

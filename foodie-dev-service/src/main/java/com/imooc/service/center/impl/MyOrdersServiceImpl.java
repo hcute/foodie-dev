@@ -1,11 +1,13 @@
 package com.imooc.service.center.impl;
 
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.imooc.enums.OrderStatusEnum;
+import com.imooc.enums.YesOrNo;
 import com.imooc.mapper.OrderStatusMapper;
+import com.imooc.mapper.OrdersMapper;
 import com.imooc.mapper.OrdersMapperCustom;
 import com.imooc.pojo.OrderStatus;
+import com.imooc.pojo.Orders;
 import com.imooc.pojo.vo.MyOrdersVO;
 import com.imooc.service.center.MyOrdersService;
 import com.imooc.utils.PagedGridResult;
@@ -21,13 +23,17 @@ import java.util.List;
 
 
 @Service
-public class MyOrdersServiceImpl implements MyOrdersService {
+public class MyOrdersServiceImpl extends BasicService implements MyOrdersService {
 
     @Autowired
     private OrdersMapperCustom ordersMapperCustom;
 
     @Autowired
     private OrderStatusMapper orderStatusMapper;
+
+
+    @Autowired
+    private OrdersMapper ordersMapper;
 
     @Override
     public PagedGridResult queryByOrders(String userId, Integer orderStatus, Integer page, Integer pageSize) {
@@ -58,13 +64,45 @@ public class MyOrdersServiceImpl implements MyOrdersService {
         orderStatusMapper.updateByExampleSelective(updateOrder, example);
     }
 
-    private PagedGridResult setterPagedGird(List<?> list,Integer page) {
-        PageInfo<?> pageList = new PageInfo<>(list);
-        PagedGridResult grid = new PagedGridResult();
-        grid.setPage(page);
-        grid.setRows(list);
-        grid.setTotal(pageList.getPages());
-        grid.setRecords(pageList.getTotal());
-        return grid;
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public Orders queryMyOrder(String userId, String orderId) {
+
+        Orders orders = new Orders();
+        orders.setIsDelete(YesOrNo.NO.type);
+        orders.setUserId(userId);
+        orders.setId(orderId);
+        return ordersMapper.selectOne(orders);
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public boolean updateReceiveOrderStatus(String orderId) {
+        OrderStatus orderStatus = new OrderStatus();
+        orderStatus.setOrderStatus(OrderStatusEnum.SUCCESS.type);
+        orderStatus.setSuccessTime(new Date());
+        Example example = new Example(OrderStatus.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderId",orderId);
+        criteria.andEqualTo("orderStatus",OrderStatusEnum.WAIT_RECEIVE.type);
+        int result = orderStatusMapper.updateByExampleSelective(orderStatus, example);
+        return result == 1 ? true:false;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public boolean deleteOrder(String userId, String orderId) {
+        Orders orders = new Orders();
+        orders.setIsDelete(YesOrNo.YES.type);
+        orders.setUpdatedTime(new Date());
+        Example example = new Example(Orders.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("id",orderId);
+        criteria.andEqualTo("userId",userId);
+        int result = ordersMapper.updateByExampleSelective(orders, example);
+        return result == 1 ? true:false;
+    }
+
+
 }
